@@ -1,5 +1,5 @@
 {
-  "name": "rci-app-sails",
+  "name": "sails",
   "private": true,
   "version": "0.0.0",
   "description": "a Sails application",
@@ -26,7 +26,7 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/cooper/rci-app-sails.git"
+    "url": "git://github.com/cooper/sails.git"
   },
   "author": "cooper",
   "license": "",

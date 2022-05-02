@@ -1,4 +1,4 @@
-# rci-app-sails
+# sails
 
 a [Sails v1](https://sailsjs.com) application
 
@@ -14,7 +14,7 @@ a [Sails v1](https://sailsjs.com) application
 
 ### Version info
 
-This app was originally generated on Mon May 02 2022 00:42:30 GMT-0500 (Central Daylight Time) using Sails v1.5.2.
+This app was originally generated on Mon May 02 2022 00:47:44 GMT-0500 (Central Daylight Time) using Sails v1.5.2.
 
 <!-- Internally, Sails used [`sails-generate@2.0.6`](https://github.com/balderdashy/sails-generate/tree/v2.0.6/lib/core-generators/new). -->
 
