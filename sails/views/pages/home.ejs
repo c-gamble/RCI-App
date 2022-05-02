@@ -1,0 +1,44 @@
+<html>
+    <style>
+        .post-container {
+            background-color: rgb(235, 235, 235);
+            border-radius: 5px;
+            border: solid 1px black;
+            margin: 16px;
+            padding: 16px
+        }
+    </style>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        async function handleDeletePost(e) {
+            console.log("post deletion in progress")
+            console.log(e.target.id)
+            const postId = e.target.id
+            const url = "/post"+postId
+            try {
+                const response = await axios.delete(url)
+                location.reload()
+            }
+            catch (err) {
+                alert(err.toString())
+            }
+        }
+    </script>
+    <body>
+        <form class = "post-container" action = "/post" method = "POST">
+            <div>Post Creation</div>
+            <input name = "title" type = "text" placeholder = "post title">
+            <input name = "postBody" type = "text" placeholder = "post body">
+            <button type = "submit">Submit</button>
+        </form>
+        <div>
+            <% allPosts.forEach(p => { %>
+                <div class = "post-container">
+                    <div><%= p.title %></div>
+                    <div><%= p.postBody %></div>
+                    <button id = '<%= p.id %>' onclick = "handleDeletePost(event)">Delete</button>
+                </div>
+            <% }) %>
+        </div>
+    </body>
+</html>
