@@ -7,17 +7,17 @@ module.exports = {
             return res.serverError(err.toString())
         }
     },
-    create: (req, res) => {
-        const title = req.body.title
-        const postBody = req.body.postBody
-        Post.create({title:title, postBody:postBody}).exec((err) => {
-            if (err) {
-                return res.serverError(err.toString())
-            }
-            console.log("post object created successfuly")
-            return res.redirect('/home')
-        })
-    },
+    // create: (req, res) => {
+    //     const title = req.body.title
+    //     const postBody = req.body.postBody
+    //     Post.create({title:title, postBody:postBody}).exec((err) => {
+    //         if (err) {
+    //             return res.serverError(err.toString())
+    //         }
+    //         console.log("post object created successfuly")
+    //         return res.redirect('/home')
+    //     })
+    // },
     findById: (req, res) => {
         const postId = req.param('postId')
         const filteredPosts = allPosts.filter( p => {return p.id == postId})
@@ -28,9 +28,9 @@ module.exports = {
         }
         res.send(postId)
     },
-    delete: async (req, res) => {
-        const postId = req.param('postId')
-        await Post.destroy({id:postId})
-        res.send("deletion successful")
-    }
+    // delete: async (req, res) => {
+    //     const postId = req.param('postId')
+    //     await Post.destroy({id:postId})
+    //     res.send("deletion successful")
+    // }
 }
