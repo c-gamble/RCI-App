@@ -11,78 +11,10 @@ struct Post:Decodable {
     let id: Int;
     let title, postBody: String
 }
-class Service: NSObject {
-    static let shared = Service()
-    func fetchPosts(completion: @escaping (Result<[Post],Error>) -> ()) {
-        guard let url = URL(string: "http://localhost:1337/posts") else {return}
-        URLSession.shared.dataTask(with: url) { (data, resp, err) in
-            DispatchQueue.main.async {
-                if let err = err{
-                    print("failed to fetch posts:", err)
-                    return
-                }
-                guard let data = data else {return}
-                do {
-                    let posts = try JSONDecoder().decode([Post].self, from: data)
-                    completion(.success(posts))
-                } catch {
-                    completion(.failure(error))
-                }
-            }
-            
-        }.resume()
-    }
-    func createPost(title: String, postBody: String, completion: @escaping (Error?) -> ()) {
-        guard let url = URL(string: "http://localhost:1337/post") else {return}
-        var urlReq = URLRequest(url: url)
-        urlReq.httpMethod = "POST"
-        let params = ["title":title, "postBody":postBody]
-        do {
-            let data = try JSONSerialization.data(withJSONObject: params, options: .init())
-            urlReq.httpBody = data
-            urlReq.setValue("application/json", forHTTPHeaderField: "content-type")
-            URLSession.shared.dataTask(with: urlReq) { (data, resp, err) in
-                DispatchQueue.main.async {
-                    if let err = err {
-                        completion(err)
-                        return
-                    }
-                    if let resp = resp as? HTTPURLResponse, resp.statusCode != 200 {
-                        let errorString = String(data: data ?? Data(), encoding: .utf8) ?? ""
-                        completion(NSError(domain: "", code: resp.statusCode, userInfo: [NSLocalizedDescriptionKey: errorString]))
-                        return
-                    }
-                    completion(nil)
-                }
-            }.resume()
-        } catch {
-            completion(error)
-        }
-    }
-    
-    func deletePost(id: Int, completion: @escaping (Error?) -> ()) {
-        guard let url = URL(string: "http://localhost:1337/post/\(id)") else {return}
-        var urlReq = URLRequest(url: url)
-        urlReq.httpMethod = "DELETE"
-        URLSession.shared.dataTask(with: urlReq) { (data, resp, err) in
-            DispatchQueue.main.async {
-                if let err = err {
-                    completion(err)
-                    return
-                }
-                if let resp = resp as? HTTPURLResponse, resp.statusCode != 200 {
-                    let errorString = String(data: data ?? Data(), encoding: .utf8) ?? ""
-                    completion(NSError(domain: "", code: resp.statusCode, userInfo: [NSLocalizedDescriptionKey: errorString]))
-                    return
-                }
-                completion(nil)
-            }
-        }.resume()
-    }
-}
+
 class ViewController: UIViewController {
     
-    fileprivate func fetchPosts() {
+    @objc fileprivate func fetchPosts() {
         Service.shared.fetchPosts { (res) in
             switch res {
             case .failure(let err):
@@ -101,16 +33,40 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        fetchPosts()
+        let rc = UIRefreshControl()
+        rc.addTarget(self, action: #selector(fetchPosts), for: .valueChanged)
+        tableView.refreshControl = rc
         
-        tableView.dataSource = self
-        tableView.delegate = self
+        //fetchPosts()
         
-        navigationController?.navigationBar.isTranslucent = false
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.title = "Posts"
+        navigationItem.rightBarButtonItem = .init(title: "Create Post", style: .plain, target: self, action: #selector(handleCreatePost))
         
-        navigationItem.rightBarButtonItem = .init(title:"Create Post", style: .plain, target: self, action: #selector(handleCreatePost))
+        navigationItem.leftBarButtonItem = .init(title: "Login", style: .plain, target: self, action: #selector(handleLogin))
+    }
+    @objc fileprivate func handleLogin() {
+        print("perform login and fetch posts")
+        
+        guard let url = URL(string: "http://localhost:8081/api/v1/entrance/login") else {return}
+       
+        var loginReq = URLRequest(url: url)
+        loginReq.httpMethod = "PUT"
+        do {
+            let params = ["emailAddress":"testuser@gmail.com", "password":"1234"]
+            loginReq.httpBody = try JSONSerialization.data(withJSONObject: params, options: .init())
+            URLSession.shared.dataTask(with: loginReq) { data, resp, err in
+                if let err = err {
+                    print("failed to login: ", err)
+                    return
+                }
+                print("successful login")
+                self.fetchPosts()
+            }.resume()
+        } catch {
+            print("failed to serialize data: ", error)
+        }
+
     }
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
